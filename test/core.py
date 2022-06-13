@@ -130,17 +130,17 @@ def webCamThread(uiRoot):
         if score > 100:
             uiRoot.UpdateImage(frame, None, None)
             uiRoot.StatusLabel("블러 점수 100점 이하")
-            # continue
+            continue
         elif not (previousImage is None):
             score = SimilityImage(previousImage, frame)
             if score > 0.95:
                 uiRoot.UpdateImage(frame, None, None)
                 uiRoot.StatusLabel("유사도 95%이상")
-                # continue
+                continue
         previousImage = frame
 
+        uiRoot.StatusLabel("YOLO 테스트")
         result = p.predict(frame)
-
         for item in range(len(result)):
             if result[item].get_score() > 0.45:
                 (xmin, ymin, xmax, ymax) = result[item].get_rect()

@@ -8,7 +8,7 @@ import tkinter.font
 import core as video
 import cv2
 from PIL import Image, ImageTk
-
+# https://github.com/honghaier-game/TKinterDesigner
 #Add your Varial Here: (Keep This Line of comments)
 #Define UI Class
 class  Project1:
