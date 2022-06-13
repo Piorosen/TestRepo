@@ -5,17 +5,17 @@ from PIL import Image
 import detection as p
 import cv2
 
-
-# https://pyimagesearch.com/2015/09/07/blur-detection-with-opencv/
 # 블러 디텍션
+# https://pyimagesearch.com/2015/09/07/blur-detection-with-opencv/
 def BlurDetect(image):
     return cv2.Laplacian(image, cv2.CV_64F).var()
 
-# 히스토그램 이미지
+# 히스토그램 평활화
 def EqualizeImage(image):
     return cv2.equalizeHist(image)
 
 # 이미지 유사도 측정
+# 장경식 교수님 코드 참조.
 def SimilityImage(image1, image2):
     image1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
     image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
@@ -23,11 +23,12 @@ def SimilityImage(image1, image2):
     hist2 = cv2.calcHist([image2], [0], None, [256], [0, 256])
     return cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
 
+#
 def ImageRotate(img):
     imgOrigin = img.copy()
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # https://opencv-python.readthedocs.io/en/latest/doc/09.imageThresholding/imageThresholding.html
 
+    # https://opencv-python.readthedocs.io/en/latest/doc/09.imageThresholding/imageThresholding.html
     thresh = cv2.adaptiveThreshold(
         img,
         maxValue=255.0,
@@ -36,6 +37,7 @@ def ImageRotate(img):
         blockSize=9,
         C=2
     )
+
     # ret, thresh = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
     # https://www.wake-up-neo.com/ko/python/opencv%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-%EC%9D%B4%EB%AF%B8%EC%A7%80%EC%97%90%EC%84%9C-%EC%82%AC%EA%B0%81%ED%98%95%EC%9D%98-%EC%A4%91%EC%8B%AC%EA%B3%BC-%EA%B0%81%EB%8F%84-%EA%B0%90%EC%A7%80/823074665/
     contours, e = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -47,7 +49,6 @@ def ImageRotate(img):
     for item in range(len(contours)):
         rect = cv2.minAreaRect(contours[item])
         if abs(rect[2]) > 0.5 and rect[1][0] > 50 and rect[1][1] > 20:
-        # if :
             cntsFirst = item
             break
 
@@ -56,9 +57,10 @@ def ImageRotate(img):
 
     plate_rect = cv2.minAreaRect(cnts)
     print(plate_rect)
-    # cv2.imshow("aa", img[cnts])
 
 
+    # 45, -45 데이터는 잘못 각도가 계산이 된것이므로, 수정해주어야 합니다.
+    # 경험 상
     image_rect = plate_rect
     if plate_rect[2] > 45 and plate_rect[2] < 135:
         image_rect = (plate_rect[0], plate_rect[1], plate_rect[2] - 90)
@@ -106,12 +108,10 @@ def ImageRecognize(img):
     _, img_the = cv2.threshold(img_blurred, 80, 255, cv2.THRESH_BINARY)
     return img_the
 
-
+# 카메라 1번을 사용합니다.
 cap = cv2.VideoCapture(0)
 
-isFirst = True
 suspend = True
-
 previousImage = None
 
 def WebCamOff():
@@ -131,13 +131,12 @@ def webCamThread(uiRoot):
             uiRoot.UpdateImage(frame, None, None)
             uiRoot.StatusLabel("블러 점수 100점 이하")
             # continue
-        elif not isFirst:
+        elif not (previousImage is None):
             score = SimilityImage(previousImage, frame)
             if score > 0.95:
                 uiRoot.UpdateImage(frame, None, None)
                 uiRoot.StatusLabel("유사도 95%이상")
                 # continue
-        isFirst = False
         previousImage = frame
 
         result = p.predict(frame)
