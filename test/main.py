@@ -31,8 +31,7 @@ class  Project1:
             self.Canvas_10.config(image=oImage)
             self.Canvas_10.image = oImage
 
-        print("update!")
-        pass
+        #print("update!")
 
     def __init__(self,root,isTKroot = True):
         uiName = self.__class__.__name__

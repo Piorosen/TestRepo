@@ -129,12 +129,14 @@ def webCamThread(uiRoot):
         score = BlurDetect(frame)
         if score > 100:
             uiRoot.UpdateImage(frame, None, None)
+            print("Blur Score : " + str(score))
             uiRoot.StatusLabel("블러 점수 100점 이하")
             continue
         elif not (previousImage is None):
             score = SimilityImage(previousImage, frame)
             if score > 0.95:
                 uiRoot.UpdateImage(frame, None, None)
+                print("Similar Score : " + str(score))
                 uiRoot.StatusLabel("유사도 95%이상")
                 continue
         previousImage = frame
