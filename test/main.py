@@ -4,6 +4,7 @@ from PIL import Image
 import detection as p
 import cv2
 
+
 # https://pyimagesearch.com/2015/09/07/blur-detection-with-opencv/
 # 블러 디텍션
 def BlurDetect(image):
@@ -104,64 +105,16 @@ def ImageRecognize(img):
     _, img_the = cv2.threshold(img_blurred, 80, 255, cv2.THRESH_BINARY)
     return img_the
 
+def WebCamOff():
+    print("tes2t")
 
-def InitGui():
-    import tkinter as tk
-    root = tk.Tk()
-    root.title('파이썬 GUI 테스트')
-    root.minsize(400, 300)  # 최소 사이즈
-
-    '''1. 프레임 생성'''
-    # 상단 프레임 (LabelFrame)
-    frm1 = tk.LabelFrame(root, text="준비", pady=15, padx=15)  # pad 내부
-    frm1.grid(row=0, column=0, pady=10, padx=10, sticky="nswe")  # pad 내부
-    root.columnconfigure(0, weight=1)  # 프레임 (0,0)은 크기에 맞춰 늘어나도록
-    root.rowconfigure(0, weight=1)
-    # 하단 프레임 (Frame)
-    frm2 = tk.Frame(root, pady=10)
-    frm2.grid(row=1, column=0, pady=10)
-    '''2. 요소 생성'''
-    # 레이블
-    lbl1 = tk.Label(frm1, text='폴더 선택')
-    lbl2 = tk.Label(frm1, text='파일 1개 선택')
-    lbl3 = tk.Label(frm1, text='파일 여러 개 선택')
-    # 리스트박스
-    listbox1 = tk.Listbox(frm1, width=40, height=1)
-    listbox2 = tk.Listbox(frm1, width=40, height=1)
-    listbox3 = tk.Listbox(frm1, width=40)
-    # 버튼
-    btn1 = tk.Button(frm1, text="찾아보기", width=8, command=select_directory)
-    btn2 = tk.Button(frm1, text="찾아보기", width=8, command=select_file)
-    btn3 = tk.Button(frm1, text="추가하기", width=8, command=select_files)
-    btn0 = tk.Button(frm2, text="초기화", width=8, command=refresh)
-    # 스크롤바 - 기능 연결
-    scrollbar = tk.Scrollbar(frm1)
-    scrollbar.config(command=listbox3.yview)
-    listbox3.config(yscrollcommand=scrollbar.set)
-    '''3. 요소 배치'''
-    # 상단 프레임
-    lbl1.grid(row=0, column=0, sticky="e")
-    lbl2.grid(row=1, column=0, sticky="e", pady=20)
-    lbl3.grid(row=2, column=0, sticky="n")
-    listbox1.grid(row=0, column=1, columnspan=2, sticky="we")
-    listbox2.grid(row=1, column=1, columnspan=2, sticky="we")
-    listbox3.grid(row=2, column=1, rowspan=2, sticky="wens")
-    scrollbar.grid(row=2, column=2, rowspan=2, sticky="wens")
-    btn1.grid(row=0, column=3)
-    btn2.grid(row=1, column=3)
-    btn3.grid(row=2, column=3, sticky="n")
-    # 상단프레임 grid (2,1)은 창 크기에 맞춰 늘어나도록
-    frm1.rowconfigure(2, weight=1)
-    frm1.columnconfigure(1, weight=1)
-    # 하단 프레임
-    btn0.pack()
-    '''실행'''
-    root.mainloop()
+def WebCamOn():
+    cv2.Video
+    print("test")
 
 
 def main():
-    InitGui()
-
+    print(1+2)
 
     while True:
         data3 = cv2.imread("./resources/222.jpg")
