@@ -1,145 +1,88 @@
-from tkinter import *
-import numpy as np
-from PIL import Image
-import detection as p
+#coding=utf-8
+#import libs
+import sys
+import os
+from   tkinter import *
+import tkinter.ttk
+import tkinter.font
+import core as video
 import cv2
+from PIL import Image, ImageTk
 
+#Add your Varial Here: (Keep This Line of comments)
+#Define UI Class
+class  Project1:
+    def StatusLabel(self, text):
+        self.statusText.set("상태 : " + text)
 
-# https://pyimagesearch.com/2015/09/07/blur-detection-with-opencv/
-# 블러 디텍션
-def BlurDetect(image):
-    return cv2.Laplacian(image, cv2.CV_64F).var()
+    def UpdateImage(self, origin, plate, crop):
+        # print(origin)
+        oImage = ImageTk.PhotoImage(image=Image.fromarray(origin).resize((542, 252)))
+        self.Canvas_11.config(image=oImage)
+        self.Canvas_11.image = oImage
 
-# 히스토그램 이미지
-def EqualizeImage(image):
-    return cv2.equalizeHist(image)
+        if not (plate is None):
+            oImage = ImageTk.PhotoImage(image=Image.fromarray(plate).resize((230, 82)))
+            self.Canvas_9.config(image=oImage)
+            self.Canvas_9.image = oImage
 
-# 이미지 유사도 측정
-def SimilityImage(image1, image2):
-    image1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
-    image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
-    hist1 = cv2.calcHist([image1], [0], None, [256], [0, 256])
-    hist2 = cv2.calcHist([image2], [0], None, [256], [0, 256])
-    return cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
+        if not (crop is None):
+            oImage = ImageTk.PhotoImage(image=Image.fromarray(crop).resize((230, 82)))
+            self.Canvas_10.config(image=oImage)
+            self.Canvas_10.image = oImage
 
-def ImageRotate(img):
-    imgOrigin = img.copy()
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # https://opencv-python.readthedocs.io/en/latest/doc/09.imageThresholding/imageThresholding.html
+        print("update!")
+        pass
 
-    thresh = cv2.adaptiveThreshold(
-        img,
-        maxValue=255.0,
-        adaptiveMethod=cv2.ADAPTIVE_THRESH_MEAN_C,
-        thresholdType=cv2.THRESH_BINARY,
-        blockSize=9,
-        C=2
-    )
-    # ret, thresh = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
-    # https://www.wake-up-neo.com/ko/python/opencv%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-%EC%9D%B4%EB%AF%B8%EC%A7%80%EC%97%90%EC%84%9C-%EC%82%AC%EA%B0%81%ED%98%95%EC%9D%98-%EC%A4%91%EC%8B%AC%EA%B3%BC-%EA%B0%81%EB%8F%84-%EA%B0%90%EC%A7%80/823074665/
-    contours, e = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    if len(contours) == 0:
-        print("Not Found")
-    len(contours[0])
-    cntsFirst = -1
+    def __init__(self,root,isTKroot = True):
+        uiName = self.__class__.__name__
+        self.root = root
+        if isTKroot == True:
+            root.title("자동차 번호판 인식 영역 추출")
+            root['background'] = '#efefef'
 
-    for item in range(len(contours)):
-        rect = cv2.minAreaRect(contours[item])
-        if abs(rect[2]) > 0.5 and rect[1][0] > 5 and rect[1][1] > 5:
-        # if :
-            cntsFirst = item
-            break
+        self.statusText = StringVar()
+        self.statusText.set("상태 : ")
+        Form_1 = tkinter.Canvas(root, width=10, height=4)
+        Form_1.place(x=0, y=0, width=640, height=480)
+        Form_1.configure(bg="#efefef")
+        Form_1.configure(highlightthickness=0)
+        # Create the elements of root
+        LabelFrame_5 = tkinter.LabelFrame(Form_1, text="관리", takefocus=True, width=10, height=4)
+        LabelFrame_5.place(x=24, y=16, width=596, height=58)
+        LabelFrame_5.configure(relief="groove")
+        Button_6 = tkinter.Button(LabelFrame_5, text="Webcam", width=10, height=4)
+        Button_6.place(x=39, y=5, width=100, height=28)
+        Button_6.configure(command=lambda: video.WebCamOn(self))
 
-    print(cntsFirst)
-    cnts = contours[cntsFirst]
+        Button_8 = tkinter.Button(LabelFrame_5, text="Webcam Close", width=10, height=4)
+        Button_8.place(x=150, y=5, width=100, height=28)
+        Button_8.configure(command=lambda: video.WebCamOff())
 
-    plate_rect = cv2.minAreaRect(cnts)
-    print(plate_rect)
-    # cv2.imshow("aa", img[cnts])
+        self.Label_12 = tkinter.Label(LabelFrame_5, textvariable=self.statusText, width=10, height=4)
+        self.Label_12.place(x=319, y=8, width=200, height=20)
+        self.Label_12.configure(relief="flat")
 
+        self.Canvas_9 = tkinter.Label(Form_1)
+        self.Canvas_9.place(x=38, y=106, width=230, height=82)
+        # self.Canvas_9.configure(bg="#eadf57")
+        # self.Canvas_9_Container = self.Canvas_9.create_image(0,0, anchor="nw")
+        self.Canvas_10 = tkinter.Label(Form_1)
+        self.Canvas_10.place(x=350, y=109, width=230, height=82)
+        # self.Canvas_10.configure(bg="#61bae0")
+        # self.Canvas_10_Container = self.Canvas_10.create_image(0,0, anchor="nw")
 
-    image_rect = plate_rect
-    if plate_rect[2] > 45 and plate_rect[2] < 135:
-        image_rect = (plate_rect[0], plate_rect[1], plate_rect[2] - 90)
-    elif plate_rect[2] < -45 and plate_rect[2] > -135:
-        image_rect = (plate_rect[0], plate_rect[1], plate_rect[2] - 90)
+        self.Canvas_11 = tkinter.Label(Form_1)
+        self.Canvas_11.place(x=38, y=215, width=542, height=252)
+        # self.Canvas_11.configure(bg="#f05155")
+        # self.Canvas_11_Container = self.Canvas_11.create_image(0,0, anchor="nw")
 
-    plate_box = np.int0(cv2.boxPoints(plate_rect))
-    image_box = np.int0(cv2.boxPoints(image_rect))
+        # Inital all element's Data
+        # Add Some Logic Code Here: (Keep This Line of comments)
 
-    # https://pybasall.tistory.com/135
-    avg = plate_box.mean(axis=0)
-    image_center = (avg[0], avg[1])
-    avg
-    # https://stackoverflow.com/questions/9041681/opencv-python-rotate-image-by-x-degrees-around-specific-point
-
-    plate_rot_mat = cv2.getRotationMatrix2D(image_center, plate_rect[2], 1.0)
-    image_rot_mat = cv2.getRotationMatrix2D(image_center, image_rect[2], 1.0)
-
-    pts = np.int0(cv2.transform(np.array([plate_box]), plate_rot_mat))[0]
-    rot_image = cv2.warpAffine(imgOrigin, image_rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
-    pts = np.int0(cv2.transform(np.array([image_box]), plate_rot_mat))[0]
-    rot_image.shape
-
-    pts.sort(axis=0)
-    pts[3][1]
-    # crop
-
-    img_crop = rot_image[pts[0][1]:pts[3][1], pts[0][0]:pts[3][0]]
-    img_crop.shape
-    return img_crop
-
-def ImageRecognize(img):
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img_equal = EqualizeImage(img_gray)
-
-    img_thresh = cv2.adaptiveThreshold(
-        img_equal,
-        maxValue=255.0,
-        adaptiveMethod=cv2.ADAPTIVE_THRESH_MEAN_C,
-        thresholdType=cv2.THRESH_BINARY,
-        blockSize=9,
-        C=0
-    )
-    img_blurred = cv2.GaussianBlur(img_thresh, ksize=(5, 5), sigmaX=0)
-    _, img_the = cv2.threshold(img_blurred, 80, 255, cv2.THRESH_BINARY)
-    return img_the
-
-def WebCamOff():
-    print("tes2t")
-
-def WebCamOn():
-    cv2.Video
-    print("test")
-
-
-def main():
-    print(1+2)
-
-    while True:
-        data3 = cv2.imread("./resources/222.jpg")
-        result = p.predict(data3)
-        result[0].get_rect()
-
-        for item in range(len(result)):
-            if result[item].get_score() > 0.45:
-                (xmin, ymin, xmax, ymax) = result[item].get_rect()
-                print((xmin, ymin, xmax, ymax))
-                img = data3[ymin:ymax, xmin:xmax].copy()
-
-                img_crop = ImageRotate(img)
-                img_adaptive = ImageRecognize(img_crop)
-
-
-                # cv2.polylines(img, [image_box], True, 127, 10)
-                cv2.imshow(str(item) + "3", img_adaptive)
-                cv2.imshow(str(item) + "2", img_crop)
-                cv2.imshow(str(item) + "1", img)
-                cv2.waitKey()
-
-if __name__ == "__main__":
-    main()
-
-
-
-
+#Create the root of Kinter
+if  __name__ == '__main__':
+    root = tkinter.Tk()
+    root.geometry('640x480')
+    MyDlg = Project1(root)
+    root.mainloop()
